@@ -490,6 +490,10 @@ public class XCodeBuilder extends Builder {
                 if (!StringUtils.isEmpty(uuid)) {
                     commandLine.add("PROVISIONING_PROFILE=" + uuid);
                     xcodeReport.append(", provisioningProfile: " + uuid);
+
+                    // copy to MobileDevice/Provisioning Profiles
+                    returnCode = launcher.launch().envs(envs).cmds("cp", embeddedProfileFile, "$HOME/Library/MobileDevice/Provisioning Profiles/").pwd(projectRoot).join();
+                    listener.getLogger().println("copy mobileprovision returnCode = " + returnCode);
                 }
             }
             output.reset();
