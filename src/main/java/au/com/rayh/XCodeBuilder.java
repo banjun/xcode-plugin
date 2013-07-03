@@ -480,6 +480,21 @@ public class XCodeBuilder extends Builder {
             xcodeReport.append(", codeSignIdentity: DEFAULT");
         }
 
+        // specify PROVISIONING_PROFILE=UUID
+        if (!StringUtils.isEmpty(embeddedProfileFile) && embeddedProfileFile.matches("^[0-9a-zA-Z./_ -]+$")) {
+            output.reset();
+            returnCode = launcher.launch().envs(envs).cmds("sh", "-c", "grep UUID -A1 -a \"" + embeddedProfileFile + "\" | grep -o '[-A-Z0-9]\\{36\\}'").stdout(output).pwd(projectRoot).join();
+            listener.getLogger().println("UUID: " + output.toString());
+            if (returnCode == 0) {
+                String uuid = output.toString().trim();
+                if (!StringUtils.isEmpty(uuid)) {
+                    commandLine.add("PROVISIONING_PROFILE=" + uuid);
+                    xcodeReport.append(", provisioningProfile: " + uuid);
+                }
+            }
+            output.reset();
+        }
+
         // Additional (custom) xcodebuild arguments
         if (!StringUtils.isEmpty(xcodebuildArguments)) {
             commandLine.addAll(splitXcodeBuildArguments(xcodebuildArguments));
